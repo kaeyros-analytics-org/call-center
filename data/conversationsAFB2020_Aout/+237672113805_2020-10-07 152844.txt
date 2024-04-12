@@ -1,0 +1,9 @@
++237672113805 (2020-10-07 15:28:20) : Bonsoir monsieur, je suis client à Afriland first bank. Je voudrais savoir ce qui veut dire *OTP*...
+auto (2020-10-07 15:28:45) : Bienvenu au service client de Afriland First Bank. Communiquez nous votre nom, numéro de compte et nature du problème. Nos numéros CMR +237-222-518-050 FRANCE +331-848-809-00 USA +125-249-503-30 CANADA +151-460-021-40 ALLEMAGNE +494-079-769-090
++237672113805 (2020-10-07 15:35:03) : Ngono Belibi Séraphin n.cpte : 04940451051. J'ai reçu un SMS me disant que mon *OTP* est de 440929. Je voudrais savoir ce que sait.
+FOTSO KAMGA Ben Steven (2020-10-07 16:14:48) : Avez vous souscrit à un de nos produits de banque à distance?
++237672113805 (2020-10-07 16:29:47) : Oui, SARA
+FOTSO KAMGA Ben Steven (2020-10-07 16:30:42) : Avez vous essayé de faire une transaction?
++237672113805 (2020-10-07 16:32:33) : Oui, un virement dans un de mes comptes
+FOTSO KAMGA Ben Steven (2020-10-07 16:34:17) : l'otp est le code provisoire de sécurité pour confirmer votre opération.
++237672113805 (2020-10-07 16:35:09) : Ok, merci

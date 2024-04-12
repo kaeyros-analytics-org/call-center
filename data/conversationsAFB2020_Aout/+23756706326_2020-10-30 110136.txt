@@ -1,0 +1,21 @@
++23756706326 (2020-10-30 11:01:30) : Bonjour
+auto (2020-10-30 11:01:36) : Bienvenu au service client de Afriland First Bank. Communiquez nous votre nom, numéro de compte et nature du problème. Nos numéros CMR +237-222-518-050 FRANCE +331-848-809-00 USA +125-249-503-30 CANADA +151-460-021-40 ALLEMAGNE +494-079-769-090
++23756706326 (2020-10-30 11:04:22) : J'ai télécharger application Sara sur mon Android, ce pendant, je ne parviens pas à me connecter à mon compte
+FOTSO KAMGA Ben Steven (2020-10-30 11:09:05) : Bonjour avez vous fait valider votre inscription en agence?
++23756706326 (2020-10-30 11:09:30) : Oui ça été fait
++23756706326 (2020-10-30 11:09:58) : Mais j'ai pas reçu de code pin pour cela
+FOTSO KAMGA Ben Steven (2020-10-30 11:16:49) : Dans quelle agence avez vous fait l'abonnement? pouvons nous avoir le numéro abonné à SARA et votre numéro de compte?
++23756706326 (2020-10-30 11:25:30) : Hippodrome. 656706326
+FOTSO KAMGA Ben Steven (2020-10-30 11:29:36) : Votre numéro de compte aussi
++23756706326 (2020-10-30 13:43:47) : Fichier jpg
+FOTSO KAMGA Ben Steven (2020-10-30 14:02:28) : Votre numéro ne figure pas sur notre plateforme. Merci de suivre les étapes suivantes et vous rendre en agence
+1- Téléchargez l'app SARA by Afriland sur PlayStore ou AppleStore
+2- Ouvrez l'app, choisissez votre langue de préférence puis cliquez sur SARA BANKING
+3- Cliquez sur l'onglet S’INSCRIRE à la droite, coin du haut
+4- Dans la case MATRICULE mettre les sept chiffres après le code agence. Exemple:10005 (code banque) - 00001 (code agence) 0365795 (7 premiers chiffres)
+5- Dans la case TÉLÉPHONE, cliquez d'abord sur INDICATIF et choisissez l'indicatif pays (correspondant au pays où vous êtes), puis accoté de ca insérez votre numéro comme suit: ne plus introduire le code pays
+6- Cocher le box d'acceptation des termes et conditions, puis cliquez le BOUTON ROUGE
+7- Cliquez une fois de plus sur le bouton rouge GENERER OTP
++23756706326 (2020-10-30 15:15:05) : J'ai fait effectivement on me dit que le compte n'est pas activé ?
++23756706326 (2020-10-30 15:16:17) : dans ce cas j'espère cela ne bloque aucun virement ou  retrait d'argent que je pourrais effectuer
+FOTSO KAMGA Ben Steven (2020-10-30 16:25:07) : Non ça ne vous bloque pas.

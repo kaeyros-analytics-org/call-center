@@ -1,0 +1,21 @@
+- ammeliorer le service client
+exploitation des données issus des calls center
+aider les agences à vendre les produits ()
+on a des aggences qui doivent fournir des reporting BI
+appartir de la base de données produire un etat exact 
+- il veut automatiser le traitement / reporting des agences car avec power bi le travail est manuel
+- s'agissant 
+
+CALL CENTER 
+- que faire de bon des données obtenu des calls centers
+- faire un systeme de recommandation concernant les messages des CALL CENTER
+- il veulent faire du call selling
+- c'est qoui le probleme
+- il a soumit son probleme à quel heure 
+- faire un traitement des données                
+- le temps pour ressoudre un problem                                
+- je vais extraire les informations inutile
+                                             
+
+on fait une web application pour tout ses tableau , puis un voutob pour generate report                                           
+

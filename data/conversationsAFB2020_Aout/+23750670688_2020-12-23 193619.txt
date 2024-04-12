@@ -1,0 +1,15 @@
++23750670688 (2020-12-23 19:35:55) : 100806310
+auto (2020-12-23 19:36:19) : Bienvenu au service client de Afriland First Bank. Communiquez nous votre nom, numéro de compte et nature du problème. Nos numéros CMR +237-222-518-050 FRANCE +331-848-809-00 USA +125-249-503-30 CANADA +151-460-021-40 ALLEMAGNE +494-079-769-090
++23750670688 (2020-12-23 19:36:23) : Fichier jpg
++23750670688 (2020-12-23 19:36:40) : Fichier jpg
++23750670688 (2020-12-23 19:39:06) : J'aimerais consultez mon compte
++23750670688 (2020-12-23 19:39:06) : Numéro de compte 00003-06164241051-24
+FOTSO KAMGA Ben Steven (2020-12-23 19:43:56) : 1- Téléchargez l'app SARA by Afriland sur PlayStore ou AppleStore
+2- Ouvrez l'app, choisissez votre langue de préférence puis cliquez sur SARA BANKING
+3- Cliquez sur l'onglet S’INSCRIRE à la droite, coin du haut
+4- Dans la case MATRICULE mettre les sept chiffres après le code agence:10005 (code banque) - 00001 (code agence) 0365795 (7 premiers chiffres)
+5- Dans la case TÉLÉPHONE, cliquez d'abord sur INDICATIF et choisissez l'indicatif pays (correspondant au pays où vous êtes), puis accoté de ça insérez votre numéro comme suit: ne plus introduire le code pays
+6- Cocher le box d'acceptation des termes et conditions, puis cliquez le BOUTON ROUGE
+7- Cliquez une fois de plus sur le bouton rouge GENERER OTP
+8- Rendez-vous en agence pour activation
+
