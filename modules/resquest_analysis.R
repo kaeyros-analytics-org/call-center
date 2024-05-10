@@ -5,55 +5,116 @@ resquest_analysis_ui <- function(id){
     tags$style("
                .fieldGroup-82{border: none;}
                "),
+    div(class="row p-0 m-0",
+        div(class="col-lg-4", valueBoxOutput(ns("total_chat_entry"), width = 10)),
+        div(class="col-lg-4", valueBoxOutput(ns("total_chat_duration"), width = 20)),
+        div(class="col-lg-4", valueBoxOutput(ns("average_chat_duration"), width = 20))
+    ),
     div(class="container-fluid",
         div(class="row p-0 m-0", 
-            div(class="col-lg-6 pr-1 pl-0", plotlyOutput(ns("plot2"), width = "100px", height = "500px")
-                ),
-            div(class="col-lg-6 pl-1 pr-0", id = "linechart", plotlyOutput(ns("plot"), width = "100px", height = "500px"))))
+            div(class="col-lg-6 pr-1 pl-0", style = "text-align: center;", tags$h4("Occurences of chat by time slot and day of the week"), plotlyOutput(ns("request_per_day_hour"))),
+            div(class="col-lg-6 pl-1 pr-0",style = "text-align: center;",  id = "linechart", tags$h4("Customer Request per Month"), plotlyOutput(ns("request_per_month")))))
   )
   
 }
 
 ########### Server for ENTREE RELATION
-resquest_analysis_server <- function(input, output, session){
-  
-  output$plot <- renderPlotly({
-    stock <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/finance-charts-apple.csv')
-    
-    fig <- plot_ly(stock, type = 'scatter', mode = 'lines', line = list(color = "#05529B"))%>%
-      add_trace(x = ~Date, y = ~AAPL.High, marker = list(color = "#0077B6"))%>%
-      layout(showlegend = F)
-    fig <- fig %>%
-      layout(
-        xaxis = list(zerolinecolor = '#ffff',
-                     zerolinewidth = 2,
-                     gridcolor = 'ffff'),
-        yaxis = list(zerolinecolor = '#ffff',
-                     zerolinewidth = 2,
-                     gridcolor = 'ffff'),
-        plot_bgcolor='#e5ecf6', width = 650)
-    
-    
-    fig
+resquest_analysis_server <- function(input, output, session, filterStates){
+  data_filter <- reactive({ data %>%
+    filter(Start_time_discusion >= ymd(filterStates$date_start) &
+             Start_time_discusion <= ymd(filterStates$date_end)) 
   })
   
-  output$plot2 <- renderPlotly({
-    stock <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/finance-charts-apple.csv')
+  data_per_day_hour_filter<- reactive({data_per_day_hour %>%
+    filter(Start_time_discusion >= ymd(filterStates$date_start) &
+             Start_time_discusion <= ymd(filterStates$date_end))
+  })
+  
+  data_request_per_month_filter <- reactive({data_request_per_month %>%
+    filter(Start_time_discusion >= ymd(filterStates$date_start) &
+             Start_time_discusion <= ymd(filterStates$date_end))
+  })
+  
+  
+  # Sample output for demonstration purpose
+  output$total_chat_entry <- renderInfoBox({
     
-    fig <- plot_ly(stock, type = 'scatter', mode = 'lines', line = list(color = "#0DDD50"))%>%
-      add_trace(x = ~Date, y = ~AAPL.High, marker = list(color = "#00DDDD"))%>%
-      layout(showlegend = F)
-    fig <- fig %>%
-      layout(
-        xaxis = list(zerolinecolor = '#ffff',
-                     zerolinewidth = 2,
-                     gridcolor = 'ffff'),
-        yaxis = list(zerolinecolor = '#ffff',
-                     zerolinewidth = 2,
-                     gridcolor = 'ffff'),
-        plot_bgcolor='#e5ecf6', width = 650)
+    infoBox(
+      HTML("<strong><h4> Total Chat Entry </h4></strong>"),
+      value = tags$b(style = "font-size: 24px; font-weight: bold; color: blue;",nrow(data_filter())),
+      icon = icon("users"),
+      color = "olive",
+      width = 50
+    )
     
+  })
+  
+  output$total_chat_duration <- renderInfoBox({
+    TotalChatDuration <- sum(data_filter()$duration_chat_s)
+    hours <- floor(TotalChatDuration / 3600)
+    minutes <- floor((TotalChatDuration %% 3600) / 60)
+    seconds <- TotalChatDuration %% 60
+    TotalChatDuration <- sprintf("%02d:%02d:%02d", hours, minutes, seconds)
     
-    fig
+    infoBox(
+      HTML("<strong><h4> Total chat duration </h4></strong><p>(hh:mm:ss)</p"),
+      value = tags$b(style = "font-size: 24px; font-weight: bold; color: blue;",TotalChatDuration),
+      icon = icon("clock"),
+      color = "olive",
+      width = 50
+    )
+      
+  })
+  output$average_chat_duration <- renderInfoBox({
+    AverageChatDuration <- median(data_filter()$duration_chat_s)
+    hours <- floor(AverageChatDuration / 3600)
+    minutes <- floor((AverageChatDuration %% 3600) / 60)
+    seconds <- round(AverageChatDuration %% 60)
+    AverageChatDuration <- sprintf("%02d:%02d:%02d", hours, minutes, seconds)
+    
+    infoBox(
+      HTML("<strong><h4> Median chat duration </h4></strong><p>(hh:mm:ss)</p"),
+      value = tags$b(style = "font-size: 24px; font-weight: bold; color: blue;",AverageChatDuration),
+      icon = icon("info"),
+      color = "olive",
+      width = 50
+    )
+      
+  })
+  
+  
+  output$request_per_day_hour <- renderPlotly({
+    
+    data_per_day <- as.data.frame(table(data_per_day_hour_filter()[c("time_period","date")]))
+    #data_per_day <- as.data.frame(table(data_per_day_hour[c("time_period","date")]))
+    
+    # Ordonner les jours de la semaine en fonction de la fréquence (hauteur des courbes)
+    ordered_days <- unique(data_per_day$date)[order(-tapply(data_per_day$Freq, data_per_day$date, max))]
+    
+    # Créer une palette de couleur allant du gris au rouge foncé, avec des nuances plus foncées pour les jours de la semaine ayant les valeurs les plus élevées
+    yiord_palette <- colorRampPalette(c("red", "gray20", "gray80"))(n = length(unique(data_per_day$date)))
+    
+    # Créer le graphique Plotly
+    data_per_day %>%
+      plot_ly(x = ~time_period, y = ~Freq, color = ~factor(date, levels = ordered_days), type = "scatter", mode = "lines+markers", colors = yiord_palette,
+              text = ~paste("Day: ", date, "<br>Time: ", time_period, "<br>Occurences: ", Freq )) %>%
+      layout(xaxis = list(title = "Time slot"), yaxis = list(title = "Occurences")) %>%
+      plotly::style(hoverinfo = "text") %>% 
+      print()
+  })
+  
+  output$request_per_month <- renderPlotly({
+    monthly_data <- data_request_per_month_filter() %>%
+      group_by(month = format(Start_time_discusion, "%b.%Y")) %>%
+      summarise(total_requests = n()) %>%
+      mutate(month_date = as.Date(paste(month, "01", sep = "-"), format = "%b.%Y-%d")) %>%
+      arrange(month_date)
+    
+    plot_ly(monthly_data, x = ~month_date, y = ~total_requests, type = "scatter", mode = "markers+lines",
+            marker = list(color = "gray90"), line = list(color = "gray90"),
+            text = ~paste("Month: ", format(month_date, "%b %Y") , "<br>Number: ", total_requests )) %>%
+      layout(xaxis = list(title = "Month"), yaxis = list(title = "Number of requests")) %>% 
+      plotly:: style(hoverinfo = "text")
+    
   })
 }

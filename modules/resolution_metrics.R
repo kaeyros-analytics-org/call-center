@@ -6,19 +6,22 @@ resolution_metrics_ui <- function(id){
     tags$style("
                .fieldGroup-82{border: none;}
                "),
+    div(class="row p-0 m-0",
+        div(class="col-lg-4", valueBoxOutput(ns("call_answer_rate"), width = 20)),
+        div(class="col-lg-4", valueBoxOutput(ns("Call_Abandonment_Rate"), width = 20))
+    ),
     div(class="container-fluid",
         div(class="row p-0 m-0", 
-            div(class="col-lg-6 pr-1 pl-0",
-                plotlyOutput(ns("plot2"), width = "100px", height = "500px")
+            div(class="col-lg-6 pr-1 pl-0", style = "text-align: center;", tags$h4("Daily Evolution of First Response Time of Agent"), plotlyOutput(ns("first_response_time"))
             ),
-            div(class="col-lg-6 pl-1 pr-0", id = "linechart",
-                plotlyOutput(ns("plot"), width = "100px", height = "500px")
+            div(class="col-lg-6 pl-1 pr-0", style = "text-align: center;", tags$h4("Daily Evolution of Full Resolution Time of Agent"), id = "linechart",
+                plotlyOutput(ns("full_resolution_time"))
                 ),
-            div(class="col-lg-6 pr-1 pl-0",
-                plotlyOutput(ns("plot3"), width = "100px", height = "500px")
+            div(class="col-lg-6 pr-1 pl-0", style = "text-align: center;", tags$h4("Average Frequency Time to Solve an Issue"),
+                plotlyOutput(ns("avg_time_to_solve_issue"))
             ),
-            div(class="col-lg-6 pl-1 pr-0",
-                plotlyOutput(ns("plot4"), width = "100px", height = "500px")
+            div(class="col-lg-6 pl-1 pr-0", style = "text-align: center;", tags$h4("Frequency of Not Solve Issue"),
+                plotlyOutput(ns("not_solve_issue"))
             )
         )
     )
@@ -26,84 +29,83 @@ resolution_metrics_ui <- function(id){
 }
 
 
-resolution_metrics_server <- function(input, output, session){
-  output$plot <- renderPlotly({
-    stock <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/finance-charts-apple.csv')
-    
-    fig <- plot_ly(stock, type = 'scatter', mode = 'lines', line = list(color = "#05529B"))%>%
-      add_trace(x = ~Date, y = ~AAPL.High, marker = list(color = "#0077B6"))%>%
-      layout(showlegend = F)
-    fig <- fig %>%
-      layout(
-        xaxis = list(zerolinecolor = '#ffff',
-                     zerolinewidth = 2,
-                     gridcolor = 'ffff'),
-        yaxis = list(zerolinecolor = '#ffff',
-                     zerolinewidth = 2,
-                     gridcolor = 'ffff'),
-        plot_bgcolor='#e5ecf6', width = 650)
-    
-    
-    fig
+resolution_metrics_server <- function(input, output, session, filterStates){
+  data_filter <- reactive({ data %>%
+      filter(Start_time_discusion >= ymd(filterStates$date_start) &
+               Start_time_discusion <= ymd(filterStates$date_end)) 
   })
   
-  output$plot2 <- renderPlotly({
-    stock <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/finance-charts-apple.csv')
-    
-    fig <- plot_ly(stock, type = 'scatter', mode = 'lines', line = list(color = "#0DDD50"))%>%
-      add_trace(x = ~Date, y = ~AAPL.High, marker = list(color = "#00DDDD"))%>%
-      layout(showlegend = F)
-    fig <- fig %>%
-      layout(
-        xaxis = list(zerolinecolor = '#ffff',
-                     zerolinewidth = 2,
-                     gridcolor = 'ffff'),
-        yaxis = list(zerolinecolor = '#ffff',
-                     zerolinewidth = 2,
-                     gridcolor = 'ffff'),
-        plot_bgcolor='#e5ecf6', width = 650)
-    
-    
-    fig
+  data_first_response_bon_filter <- reactive ({
+    data_first_response_bon %>%
+      filter(Start_time_discusion >= ymd(filterStates$date_start) &
+             Start_time_discusion <= ymd(filterStates$date_end)) 
   })
   
-  output$plot3 <- renderPlotly({
-    stock <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/finance-charts-apple.csv')
-    
-    fig <- plot_ly(stock, type = 'scatter', mode = 'lines', line = list(color = "#0DDD50"))%>%
-      add_trace(x = ~Date, y = ~AAPL.High, marker = list(color = "#00DDDD"))%>%
-      layout(showlegend = F)
-    fig <- fig %>%
-      layout(
-        xaxis = list(zerolinecolor = '#ffff',
-                     zerolinewidth = 2,
-                     gridcolor = 'ffff'),
-        yaxis = list(zerolinecolor = '#ffff',
-                     zerolinewidth = 2,
-                     gridcolor = 'ffff'),
-        plot_bgcolor='#e5ecf6', width = 650)
-    
-    
-    fig
+  data_full_response_filter <- reactive ({
+    data_full_response %>%
+      filter(Start_time_discusion >= ymd(filterStates$date_start) &
+               Start_time_discusion <= ymd(filterStates$date_end)) 
   })
   
-  output$plot4 <- renderPlotly({
-    stock <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/finance-charts-apple.csv')
+  output$call_answer_rate <- renderInfoBox({
+    # Identifier les indices des éléments non vides
+    non_empty_indices <- which(lengths(data_filter()$customer_agent_discussion) > 0)
+    # Extraire les éléments non vides de la liste d'origine
+    non_empty_elements <- data_filter()$customer_agent_discussion[non_empty_indices]
+    # Filtrer et compter les éléments dont la colonne "key" contient le mot "agent"
+    filtered_elements <- non_empty_elements[sapply(non_empty_elements, function(x) any(grepl("agent", x$key)))]
+    # Calculer le taux de réponse
+    call_answer_rate <- round(length(filtered_elements) * 100 / length(non_empty_indices), 2)
     
-    fig <- plot_ly(stock, type = 'scatter', mode = 'lines', line = list(color = "#0DDD50"))%>%
-      add_trace(x = ~Date, y = ~AAPL.High, marker = list(color = "#00DDDD"))%>%
-      layout(showlegend = F)
-    fig <- fig %>%
-      layout(
-        xaxis = list(zerolinecolor = '#ffff',
-                     zerolinewidth = 2,
-                     gridcolor = 'ffff'),
-        yaxis = list(zerolinecolor = '#ffff',
-                     zerolinewidth = 2,
-                     gridcolor = 'ffff'),
-        plot_bgcolor='#e5ecf6', width = 650)
+    infoBox(
+      HTML("<strong><h4> Call Answer Rate </h4></strong>"),
+      value = tags$b(style = "font-size: 24px; font-weight: bold; color: blue;", paste0(call_answer_rate, " %")),
+      icon = icon("clock"),
+      color = "olive",
+      width = 500
+    )
     
+  })
+  
+  output$Call_Abandonment_Rate <- renderInfoBox({
+    infoBox(
+      HTML("<strong><h4> Call Abandonment Rate </h4></strong>"),
+      value = tags$b(style = "font-size: 24px; font-weight: bold; color: blue;", paste0(80, " %")),
+      icon = icon("clock"),
+      color = "olive",
+      width = 500
+    )
+
+  })
+  
+  
+  output$first_response_time <- renderPlotly({
+    chat_hours_by_day <- data_first_response_bon_filter() %>%
+      group_by(Start_time_discusion) %>%
+      summarise(total_hours = mean(hours))
     
-    fig
+    # Créer un graphique interactif avec Plotly
+    plot_ly(chat_hours_by_day, x = ~Start_time_discusion, y = ~total_hours, type = 'scatter', mode = 'lines') %>%
+      layout(xaxis = list(title = "Date"),
+             yaxis = list(title = "Time"))
+  })
+  
+  output$full_resolution_time <- renderPlotly({
+    chat_hours_by_day <- data_full_response_filter() %>%
+      group_by(Start_time_discusion) %>%
+      summarise(total_hours = mean(hours))
+    
+    # Créer un graphique interactif avec Plotly
+    plot_ly(chat_hours_by_day, x = ~Start_time_discusion, y = ~total_hours, type = 'scatter', mode = 'lines') %>%
+      layout(xaxis = list(title = "Date"),
+             yaxis = list(title = "Time"))
+    })
+  
+  output$avg_time_to_solve_issue <- renderPlotly({
+    plot_ly()
+  })
+  
+  output$not_solve_issue <- renderPlotly({
+    plot_ly()
   })
 }

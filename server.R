@@ -31,6 +31,7 @@ server <- function(input, output, session) {
   ####### Call server module for start tour.
   callModule(headerWalkthrough_server, id = "walkthrough", filterStates = filterStates)
   
+  
   ############## Icon selection for display modal form
   observeEvent(input$iconSelection, {
     callModule(headerFormModal_server, id = "formModal", iconSelection = input$iconSelection)
@@ -42,8 +43,8 @@ server <- function(input, output, session) {
   observeEvent(input$filter_data, {
     print("Apply the filter")
     filterStates$countrySelected <- input$countryInput
-    filterStates$date_start <- input$dateRangeInput[1]
-    filterStates$date_end <- input$dateRangeInput[2]
+    filterStates$date_start <- input$date_range[1]
+    filterStates$date_end <- input$date_range[2]
     #filterStates$whoAsPrint <- input$eventTypePicker
     filterStates$whoAsPrint <- input$eventTypePicker
     filterStates$filterButton <- TRUE
