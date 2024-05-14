@@ -20,19 +20,9 @@ resquest_analysis_ui <- function(id){
 
 ########### Server for ENTREE RELATION
 resquest_analysis_server <- function(input, output, session, filterStates){
-  data_filter <- reactive({ data %>%
+  resquest_analysis_data_filter <- reactive({ resquest_analysis_data %>%
     filter(Start_time_discusion >= ymd(filterStates$date_start) &
              Start_time_discusion <= ymd(filterStates$date_end)) 
-  })
-  
-  data_per_day_hour_filter<- reactive({data_per_day_hour %>%
-    filter(Start_time_discusion >= ymd(filterStates$date_start) &
-             Start_time_discusion <= ymd(filterStates$date_end))
-  })
-  
-  data_request_per_month_filter <- reactive({data_request_per_month %>%
-    filter(Start_time_discusion >= ymd(filterStates$date_start) &
-             Start_time_discusion <= ymd(filterStates$date_end))
   })
   
   
@@ -41,7 +31,7 @@ resquest_analysis_server <- function(input, output, session, filterStates){
     
     infoBox(
       HTML("<strong><h4> Total Chat Entry </h4></strong>"),
-      value = tags$b(style = "font-size: 24px; font-weight: bold; color: blue;",nrow(data_filter())),
+      value = tags$b(style = "font-size: 24px; font-weight: bold; color: blue;",nrow(resquest_analysis_data_filter())),
       icon = icon("users"),
       color = "olive",
       width = 50
@@ -50,7 +40,7 @@ resquest_analysis_server <- function(input, output, session, filterStates){
   })
   
   output$total_chat_duration <- renderInfoBox({
-    TotalChatDuration <- sum(data_filter()$duration_chat_s)
+    TotalChatDuration <- sum(resquest_analysis_data_filter()$duration_chat_s)
     hours <- floor(TotalChatDuration / 3600)
     minutes <- floor((TotalChatDuration %% 3600) / 60)
     seconds <- TotalChatDuration %% 60
@@ -66,7 +56,7 @@ resquest_analysis_server <- function(input, output, session, filterStates){
       
   })
   output$average_chat_duration <- renderInfoBox({
-    AverageChatDuration <- median(data_filter()$duration_chat_s)
+    AverageChatDuration <- median(resquest_analysis_data_filter()$duration_chat_s)
     hours <- floor(AverageChatDuration / 3600)
     minutes <- floor((AverageChatDuration %% 3600) / 60)
     seconds <- round(AverageChatDuration %% 60)
@@ -85,9 +75,8 @@ resquest_analysis_server <- function(input, output, session, filterStates){
   
   output$request_per_day_hour <- renderPlotly({
     
-    data_per_day <- as.data.frame(table(data_per_day_hour_filter()[c("time_period","date")]))
-    #data_per_day <- as.data.frame(table(data_per_day_hour[c("time_period","date")]))
-    
+    data_per_day <- as.data.frame(table(resquest_analysis_data_filter()[c("time_period","date")]))
+
     # Ordonner les jours de la semaine en fonction de la fréquence (hauteur des courbes)
     ordered_days <- unique(data_per_day$date)[order(-tapply(data_per_day$Freq, data_per_day$date, max))]
     
@@ -104,7 +93,7 @@ resquest_analysis_server <- function(input, output, session, filterStates){
   })
   
   output$request_per_month <- renderPlotly({
-    monthly_data <- data_request_per_month_filter() %>%
+    monthly_data <- resquest_analysis_data_filter() %>%
       group_by(month = format(Start_time_discusion, "%b.%Y")) %>%
       summarise(total_requests = n()) %>%
       mutate(month_date = as.Date(paste(month, "01", sep = "-"), format = "%b.%Y-%d")) %>%

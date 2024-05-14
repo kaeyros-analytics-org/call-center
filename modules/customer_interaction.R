@@ -30,7 +30,10 @@ customer_interaction_server <- function(input, output, session, filterStates){
                Start_time_discusion <= ymd(filterStates$date_end)) 
   })
   
-  
+  wordcloud_data_filter <- reactive({ wordcloud_data %>%
+      filter(Start_time_discusion >= ymd(filterStates$date_start) &
+               Start_time_discusion <= ymd(filterStates$date_end)) 
+  })
   
   output$requests_by_agent <- renderPlotly({
     average_call_duration_with_count <- data_average_call_agent_filter() %>%
@@ -52,7 +55,7 @@ customer_interaction_server <- function(input, output, session, filterStates){
   output$topicChart <- renderUI({
     root <- getwd()
     path_data <- file.path(root,"data")
-    route <- paste(path_data,"/Topic_modelling", sep="")
+    route <- paste(file.path(path_data,"customer_interaction_data"),"/Topic_modelling", sep="")
     addResourcePath("lda", route)
     url = "lda/index.html"
     lda <- tags$iframe(src=url, height=700, width=1200)
@@ -60,7 +63,13 @@ customer_interaction_server <- function(input, output, session, filterStates){
     })
   
   output$Wordcloud <- renderUI({
-    wordcloud2(word_freq_df, size = 2)
+    
+    word_freq <- wordcloud_data_filter() %>%
+      select(value) %>%
+      unnest_tokens(word, value) %>%
+      count(word, sort = TRUE)
+    
+    wordcloud2(word_freq, size = 2)
     
   })
   

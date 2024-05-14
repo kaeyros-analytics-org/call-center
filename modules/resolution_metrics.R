@@ -30,28 +30,28 @@ resolution_metrics_ui <- function(id){
 
 
 resolution_metrics_server <- function(input, output, session, filterStates){
-  data_filter <- reactive({ data %>%
+  resolution_metrics_data_filter <- reactive({ resolution_metrics_data %>%
       filter(Start_time_discusion >= ymd(filterStates$date_start) &
                Start_time_discusion <= ymd(filterStates$date_end)) 
   })
   
-  data_first_response_bon_filter <- reactive ({
-    data_first_response_bon %>%
-      filter(Start_time_discusion >= ymd(filterStates$date_start) &
-             Start_time_discusion <= ymd(filterStates$date_end)) 
-  })
-  
-  data_full_response_filter <- reactive ({
-    data_full_response %>%
-      filter(Start_time_discusion >= ymd(filterStates$date_start) &
-               Start_time_discusion <= ymd(filterStates$date_end)) 
-  })
+  # data_first_response_bon_filter <- reactive ({
+  #   data_first_response_bon %>%
+  #     filter(Start_time_discusion >= ymd(filterStates$date_start) &
+  #            Start_time_discusion <= ymd(filterStates$date_end)) 
+  # })
+  # 
+  # data_full_response_filter <- reactive ({
+  #   data_full_response %>%
+  #     filter(Start_time_discusion >= ymd(filterStates$date_start) &
+  #              Start_time_discusion <= ymd(filterStates$date_end)) 
+  # })
   
   output$call_answer_rate <- renderInfoBox({
     # Identifier les indices des éléments non vides
-    non_empty_indices <- which(lengths(data_filter()$customer_agent_discussion) > 0)
+    non_empty_indices <- which(lengths(resolution_metrics_data_filter()$customer_agent_discussion) > 0)
     # Extraire les éléments non vides de la liste d'origine
-    non_empty_elements <- data_filter()$customer_agent_discussion[non_empty_indices]
+    non_empty_elements <- resolution_metrics_data_filter()$customer_agent_discussion[non_empty_indices]
     # Filtrer et compter les éléments dont la colonne "key" contient le mot "agent"
     filtered_elements <- non_empty_elements[sapply(non_empty_elements, function(x) any(grepl("agent", x$key)))]
     # Calculer le taux de réponse
@@ -80,9 +80,9 @@ resolution_metrics_server <- function(input, output, session, filterStates){
   
   
   output$first_response_time <- renderPlotly({
-    chat_hours_by_day <- data_first_response_bon_filter() %>%
+    chat_hours_by_day <- resolution_metrics_data_filter() %>%
       group_by(Start_time_discusion) %>%
-      summarise(total_hours = mean(hours))
+      summarise(total_hours = mean(hours_first))
     
     # Créer un graphique interactif avec Plotly
     plot_ly(chat_hours_by_day, x = ~Start_time_discusion, y = ~total_hours, type = 'scatter', mode = 'lines') %>%
@@ -91,9 +91,9 @@ resolution_metrics_server <- function(input, output, session, filterStates){
   })
   
   output$full_resolution_time <- renderPlotly({
-    chat_hours_by_day <- data_full_response_filter() %>%
+    chat_hours_by_day <- resolution_metrics_data_filter() %>%
       group_by(Start_time_discusion) %>%
-      summarise(total_hours = mean(hours))
+      summarise(total_hours = mean(hours_full))
     
     # Créer un graphique interactif avec Plotly
     plot_ly(chat_hours_by_day, x = ~Start_time_discusion, y = ~total_hours, type = 'scatter', mode = 'lines') %>%
@@ -102,7 +102,26 @@ resolution_metrics_server <- function(input, output, session, filterStates){
     })
   
   output$avg_time_to_solve_issue <- renderPlotly({
-    plot_ly()
+    # Calculate first response time
+    chat_hours_by_day_first <- resolution_metrics_data_filter() %>%
+      group_by(Start_time_discusion) %>%
+      summarise(first_response_hours = mean(hours_first))
+    
+    # Calculate full resolution time
+    chat_hours_by_day_full <- resolution_metrics_data_filter() %>%
+      group_by(Start_time_discusion) %>%
+      summarise(full_resolution_hours = mean(hours_full))
+    
+    # Merge the two datasets
+    combined_data <- merge(chat_hours_by_day_first, chat_hours_by_day_full, by = "Start_time_discusion", all = TRUE)
+    
+    # Create a plot
+    plot_ly(combined_data, x = ~Start_time_discusion) %>%
+      add_lines(y = ~first_response_hours, name = "First Response Time", line = list(color = "blue")) %>%
+      add_lines(y = ~full_resolution_hours, name = "Full Resolution Time", line = list(color = "red")) %>%
+      layout(xaxis = list(title = "Date"),
+             yaxis = list(title = "Time"))
+    
   })
   
   output$not_solve_issue <- renderPlotly({

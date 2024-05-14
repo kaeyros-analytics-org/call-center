@@ -23,23 +23,9 @@ call_sentiments_ui <- function(id){
 ########### Server for ENTREE RELATION
 call_sentiments_server <- function(input, output, session, filterStates){
   
-  data_en_filter <- reactive({ data_en %>%
+  data_en_filter <- reactive({ sentiment_data %>%
       filter(Start_time_discusion >= ymd(filterStates$date_start) &
                Start_time_discusion <= ymd(filterStates$date_end)) 
-  })
-
-  client_values <-  reactive({
-    client_values <- c()
-    # Parcourir les colonnes de 10 à 50
-    for (i in 1:nrow(data_en_filter())) {
-      # Extraire les valeurs de la colonne i pour les discussions client
-      values <- data_en_filter()[["customer_agent_discussion"]][[i]][data_en_filter()[["customer_agent_discussion"]][[i]]$key == "client", "value"]
-      
-      # Ajouter les valeurs et les temps extraits aux vecteurs correspondants
-      client_values <- c(client_values, values)
-    }
-    
-    return(client_values)
   })
   
   
@@ -51,26 +37,11 @@ call_sentiments_server <- function(input, output, session, filterStates){
     }) 
   
   output$call_sentiment <- renderPlotly({
-    # Convertir le texte en minuscules
-    client_values <- tolower(client_values())
     
-    # Supprimer la ponctuation
-    client_values <- gsub("[[:punct:]]", " ", client_values)
-    
-    # Supprimer les chiffres
-    client_values <- gsub("\\d+", "", client_values)
-    
-    # Selection des discussion uniquement anglaise
-    file_pretrained = system.file("language_identification/lid.176.ftz", package = "fastText")
-    dtbl_out <- language_identification(client_values, file_pretrained)
-    indexes <- which(dtbl_out$iso_lang_1 == "en")
-    
-    client_values <- client_values[indexes]
-    # Obtention des sentiments
-    sentiment_scores <- get_nrc_sentiment(client_values, lang="english")
-    
-    emotions <- colSums(prop.table(sentiment_scores[, 1:8]))
-    pourcentage_positive  <- colSums(prop.table(sentiment_scores[, 9:10]))
+    #client_values <- data_en_filter()$value
+    # data_en_filter()[1:5,3:10]
+    emotions <- colSums(prop.table(data_en_filter()[,3:10]))
+    pourcentage_positive  <- colSums(prop.table(data_en_filter()[,3:10]))
     
     plot_ly(labels = names(emotions), values = emotions, type = "pie", hole = 0.5) %>%
       add_annotations(

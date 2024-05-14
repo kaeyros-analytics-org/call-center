@@ -148,7 +148,6 @@ if (!dir.exists(route)) {
   write.csv(word_freq_df, file.path(path_data, "word_freq_df.csv"), row.names = FALSE)
 } else {
   # Si le dossier existe déjà, afficher un message ou effectuer une autre action
-  print("Le dossier Topic Modeling existe déjà, aucune action supplémentaire nécessaire.")
   word_freq_df <- read.csv(route)
 }
 
