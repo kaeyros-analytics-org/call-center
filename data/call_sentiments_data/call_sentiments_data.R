@@ -77,6 +77,7 @@ sentiment_data <- fromJSON(wordcloud_data_file)
 # Obtention des sentiments
 sentiment_scores <- get_nrc_sentiment(sentiment_data$value, lang="english")
 sentiment_data <- cbind(sentiment_data, sentiment_scores)
+sentiment_data$neutral <- if_else(sentiment_data$negative==0 & sentiment_data$positive==0, 1, 0)
 
 # Convertir le dataframe en JSON
 sentiment_data <- toJSON(sentiment_data)
@@ -84,3 +85,81 @@ sentiment_data <- toJSON(sentiment_data)
 output_file <- file.path(path_data,"call_sentiments_data","sentiment_data.json")
 # Exporter le JSON
 writeLines(sentiment_data, output_file)
+
+
+
+
+emotions <- colSums(prop.table(sentiment_data[,3:10]))
+pourcentage_positive  <- colSums(prop.table(sentiment_data[,11:12]))
+
+df_emotions <- as.data.frame(emotions)
+df_emotions$label <- rownames(df_emotions)
+
+
+
+# Création du graphique avec echart4r
+emotions_data <- data.frame(
+  labels = names(emotions),
+  values = emotions
+)
+
+
+
+# Ajout de la colonne "neutral"
+pourcentage_positive  <- colSums(prop.table(sentiment_data[,11:13]))
+
+# Calcul des totaux pour chaque sentiment
+total_negative <- sum(sentiment_data$negative)
+total_positive <- sum(sentiment_data$positive)
+total_neutral <- sum(sentiment_data$neutral)
+
+# Préparation des données pour echarts4r
+data <- data.frame(
+  sentiment = c("Negative", "Positive", "Neutral"),
+  count = c(total_negative, total_positive, total_neutral)
+)
+
+# Création du diagramme en anneau
+pie_chart_sentiments <- data %>%
+  e_charts(sentiment) %>%
+  e_pie(count, radius = c("50%", "70%")) %>%
+  e_title("Sentiment Analysis Doughnut Chart") %>%
+  e_tooltip(trigger = "item") %>%
+  e_legend(bottom = 0) %>% 
+  e_add_nested("itemStyle", color)
+
+pie_chart_sentiments
+
+df_emotions$color <- colorRampPalette(c("red", "gray20", "gray80"))(8)
+# Création du graphique en secteurs (pie chart)
+pie_chart <- df_emotions %>%
+  e_charts(label) %>%
+  e_pie(
+    emotions,
+    radius = c("40%", "70%"),
+    itemStyle = list(
+      borderRadius = 20,
+      borderColor = '#fff',
+      borderWidth = 2
+    )
+  ) %>%
+  e_tooltip(formatter = htmlwidgets::JS("function(params) { return params.name + ': ' + (params.percent + '%'); }")) %>%
+  e_labels(
+    show = TRUE,
+    formatter = "{d}%",
+    position = "top",
+    fontSize = 15
+  )  %>%
+  e_legend(
+    right = 0,
+    orient = "vertical"
+  ) %>%  
+  e_add_nested("itemStyle", color)
+
+# Affichage du graphique
+pie_chart
+
+pie_chart_emotions <- pie_chart
+e_arrange(pie_chart_emotions, pie_chart_sentiments, cols = 2, rows = 1)
+
+

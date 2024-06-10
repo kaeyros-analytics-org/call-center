@@ -12,13 +12,14 @@ resolution_metrics_ui <- function(id){
     ),
     div(class="container-fluid",
         div(class="row p-0 m-0", 
-            div(class="col-lg-6 pr-1 pl-0", style = "text-align: center;", tags$h4("Daily Evolution of First Response Time of Agent"), plotlyOutput(ns("first_response_time"))
+            div(class="col-lg-6 pr-1 pl-0", style = "text-align: center;", tags$h4("Daily Evolution of First Response Time of Agent"), 
+                echarts4rOutput(ns("first_response_time"))
             ),
             div(class="col-lg-6 pl-1 pr-0", style = "text-align: center;", tags$h4("Daily Evolution of Full Resolution Time of Agent"), id = "linechart",
-                plotlyOutput(ns("full_resolution_time"))
+                echarts4rOutput(ns("full_resolution_time"))
                 ),
             div(class="col-lg-6 pr-1 pl-0", style = "text-align: center;", tags$h4("Average Frequency Time to Solve an Issue"),
-                plotlyOutput(ns("avg_time_to_solve_issue"))
+                echarts4rOutput(ns("avg_time_to_solve_issue"))
             ),
             div(class="col-lg-6 pl-1 pr-0", style = "text-align: center;", tags$h4("Frequency of Not Solve Issue"),
                 plotlyOutput(ns("not_solve_issue"))
@@ -35,17 +36,6 @@ resolution_metrics_server <- function(input, output, session, filterStates){
                Start_time_discusion <= ymd(filterStates$date_end)) 
   })
   
-  # data_first_response_bon_filter <- reactive ({
-  #   data_first_response_bon %>%
-  #     filter(Start_time_discusion >= ymd(filterStates$date_start) &
-  #            Start_time_discusion <= ymd(filterStates$date_end)) 
-  # })
-  # 
-  # data_full_response_filter <- reactive ({
-  #   data_full_response %>%
-  #     filter(Start_time_discusion >= ymd(filterStates$date_start) &
-  #              Start_time_discusion <= ymd(filterStates$date_end)) 
-  # })
   
   output$call_answer_rate <- renderInfoBox({
     # Identifier les indices des éléments non vides
@@ -79,29 +69,48 @@ resolution_metrics_server <- function(input, output, session, filterStates){
   })
   
   
-  output$first_response_time <- renderPlotly({
+  output$first_response_time <- renderEcharts4r({
     chat_hours_by_day <- resolution_metrics_data_filter() %>%
       group_by(Start_time_discusion) %>%
       summarise(total_hours = mean(hours_first))
     
-    # Créer un graphique interactif avec Plotly
-    plot_ly(chat_hours_by_day, x = ~Start_time_discusion, y = ~total_hours, type = 'scatter', mode = 'lines') %>%
-      layout(xaxis = list(title = "Date"),
-             yaxis = list(title = "Time"))
+    # Créer le graph
+    chat_hours_by_day %>%
+      e_charts(Start_time_discusion) %>%
+      e_line(total_hours, name = "Total Hours", lineStyle = list(color = "blue")) %>%
+      e_x_axis(name = "Date") %>%
+      e_y_axis(name = "Time") %>%
+      e_tooltip(trigger = "axis") %>%
+      e_legend(type = "scroll",  orient = "vertical", right = "0%", top = "10%") %>% 
+      e_toolbox_feature() %>% 
+      e_toolbox_feature(
+        feature = "magicType",
+        type = list("line", "bar")
+      )
   })
   
-  output$full_resolution_time <- renderPlotly({
+  output$full_resolution_time <- renderEcharts4r({
     chat_hours_by_day <- resolution_metrics_data_filter() %>%
       group_by(Start_time_discusion) %>%
       summarise(total_hours = mean(hours_full))
     
     # Créer un graphique interactif avec Plotly
-    plot_ly(chat_hours_by_day, x = ~Start_time_discusion, y = ~total_hours, type = 'scatter', mode = 'lines') %>%
-      layout(xaxis = list(title = "Date"),
-             yaxis = list(title = "Time"))
+    chat_hours_by_day %>%
+      e_charts(Start_time_discusion) %>%
+      e_line(total_hours, lineStyle = list(color = "green")) %>%
+      e_x_axis(name = "Date") %>%
+      e_y_axis(name = "Time") %>%
+      e_tooltip(trigger = "axis") %>%
+      e_legend(type = "scroll",  orient = "vertical", right = "0%", top = "10%") %>% 
+      e_toolbox_feature() %>% 
+      e_toolbox_feature(
+        feature = "magicType",
+        type = list("line", "bar")
+      )
+    
     })
   
-  output$avg_time_to_solve_issue <- renderPlotly({
+  output$avg_time_to_solve_issue <- renderEcharts4r({
     # Calculate first response time
     chat_hours_by_day_first <- resolution_metrics_data_filter() %>%
       group_by(Start_time_discusion) %>%
@@ -116,11 +125,20 @@ resolution_metrics_server <- function(input, output, session, filterStates){
     combined_data <- merge(chat_hours_by_day_first, chat_hours_by_day_full, by = "Start_time_discusion", all = TRUE)
     
     # Create a plot
-    plot_ly(combined_data, x = ~Start_time_discusion) %>%
-      add_lines(y = ~first_response_hours, name = "First Response Time", line = list(color = "blue")) %>%
-      add_lines(y = ~full_resolution_hours, name = "Full Resolution Time", line = list(color = "red")) %>%
-      layout(xaxis = list(title = "Date"),
-             yaxis = list(title = "Time"))
+    
+    combined_data %>%
+      e_charts(Start_time_discusion) %>%
+      e_line(first_response_hours, name = "First Response Time") %>%
+      e_line(full_resolution_hours, name = "Full Resolution Time") %>%
+      e_x_axis(name = "Date") %>%
+      e_y_axis(name = "Time") %>%
+      e_tooltip(trigger = "axis") %>%
+      e_legend(type = "scroll",  orient = "vertical", right = "0%", top = "10%") %>% 
+      e_toolbox_feature() %>% 
+      e_toolbox_feature(
+        feature = "magicType",
+        type = list("line", "bar")
+      )
     
   })
   

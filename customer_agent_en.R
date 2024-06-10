@@ -194,6 +194,118 @@ if (!dir.exists(route)) {
 }
 
 
+
+
+################# recommendations system #######################
+# Créer un vecteur des produits et services offerts par Afriland First Bank
+afriland_products <- c(
+  # Pour les particuliers
+  "Current Accounts",
+  "Savings Accounts",
+  "Fixed Deposit Accounts",
+  "Foreign Currency Accounts",
+  "Islamic Personal Accounts",
+  "School Loans",
+  "End-of-Year Loans",
+  "Religious Festivities Loans",
+  "Wedding Loans",
+  "Home Loans",
+  "Prepaid Cards",
+  "Visa Classic Debit/MasterCard Premium Cards",
+  "Visa Gold/Mastercard Gold",
+  "International Prepaid Cards",
+  "Savings Bonds",
+  "Domestic Transfers",
+  "International Transfers",
+  "Flash Cash",
+  "Insurance Products",
+  
+  # Pour les entreprises
+  "Business Current Accounts",
+  "Corporate Fixed Deposit Accounts",
+  "Short-term Financing",
+  "Long-term Financing",
+  "Project Finance",
+  "Portfolio Management",
+  "Financial Engineering",
+  "Securities Management",
+  "Mobile Banking Services",
+  "E-Banking",
+  "Digital Platforms",
+  "Facilitation Contracts",
+  "IPO Services",
+  
+  # Pour les institutions
+  "Accounts and Cash Management",
+  "Currency Management",
+  "Government Securities",
+  "Financial Markets Operations",
+  
+  # Services numériques et en ligne
+  "E-First Online Banking",
+  "Sara Banking Mobile Banking",
+  "Leasing Online Applications",
+  "Credit Online Applications"
+)
+
+
+# Fonction pour détecter les produits mentionnés dans un message
+detect_products <- function(message_tokens, product_tokens) {
+  detected_products <- unlist(lapply(message_tokens, function(token) {
+    any(sapply(product_tokens, function(prod_token) token %in% prod_token))
+  }))
+  return(detected_products)
+}
+
+# Créer des tokens à partir de chaque message
+tokenize_messages <- function(messages) {
+  tokens <- str_split(messages, "\\s+")
+  return(tokens)
+}
+
+# Tokenizer les produits également
+tokenize_products <- function(products) {
+  product_tokens <- str_split(products, "\\s+")
+  return(product_tokens)
+}
+
+# Appliquer la fonction à chaque message et produit
+tokenized_messages <- tokenize_messages(df_total_en_clean_client$value[1:100])
+tokenized_products <- tokenize_products(afriland_products)
+result <- lapply(tokenized_messages, detect_products, product_tokens = tokenized_products)
+
+# Afficher les résultats
+names(result) <- df_total_en_clean_client$value[1:100]
+View(result)
+
+library(httr)
+library(jsonlite)
+
+# Fonction pour envoyer une requête à ChatGPT et obtenir une réponse
+chat_with_gpt <- function(prompt) {
+  endpoint <- "https://api.openai.com/v1/completions"
+  api_key <- "sk-proj-bVkjklRDIGge8XCfhTr8T3BlbkFJGQXqJLjdY7DwMIqwnuB8"  # Votre clé API OpenAI
+  
+  req_body <- list(prompt = prompt, temperature = 0.7, max_tokens = 50)
+  headers <- add_headers(`Content-Type` = "application/json", Authorization = paste("Bearer", api_key))
+  
+  response <- POST(url = endpoint, body = toJSON(req_body), headers = headers)
+  if (http_type(response) == "application/json") {
+    result <- content(response, as = "text", encoding = "UTF-8")
+    return(result)
+  } else {
+    return(NULL)
+  }
+}
+
+# Exemple d'utilisation
+prompt <- "Je souhaite que str_detect se fasse sur des tokens et après on essaiera de voir à quel produit cela correspond."
+
+response <- chat_with_gpt(prompt)
+print(response)
+
+
+
 ################ ANALYSE DES SENTIMENTS ###################################"
 # # Créer un vecteur pour stocker les valeurs des clients et les temps de début de discussion correspondants
 # client_values <- c()

@@ -82,3 +82,5 @@ output_file <- file.path(path_data,"resolution_metrics_data","resolution_metrics
 
 # Exporter le JSON
 writeLines(resolution_metrics_data, output_file)
+
+

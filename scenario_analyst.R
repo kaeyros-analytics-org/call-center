@@ -1,5 +1,10 @@
 library(plotly)
 library(wordcloud2)
+library(igraph)
+library(ggraph)
+library(tidygraph)
+library(tidyverse)
+library(visNetwork)
 ########plotly####################### Analyse des scenarios ############################
 
 ############## Scenario en anglais
@@ -63,6 +68,45 @@ plot_ly(scenario_df, x = ~Count, y = ~Scenario, type = 'bar', orientation = 'h')
 wordcloud2(scenario_df,  size = 2)
 
 
+
+
+# Créer une liste de paires de relations (arêtes)
+edges <- list()
+nodes <- unique(unlist(data_clean)) %>% na.omit()
+nodes_df <- data.frame(name = nodes, value = 1, size = 10, category = "Option", symbol = "circle")
+
+for (conversation in data_clean) {
+  previous_option <- NULL
+  for (option in conversation) {
+    if (!is.na(option)) {
+      if (!is.null(previous_option)) {
+        edges <- append(edges, list(c(previous_option, option)))
+      }
+      previous_option <- option
+    }
+  }
+}
+
+# Convertir la liste en data frame
+edges_df <- do.call(rbind, edges) %>%
+  as.data.frame() %>%
+  rename(source = V1, target = V2)
+
+# Création et visualisation du graphe interactif
+e_charts() %>%
+  e_graph(layout = "force") %>%
+  e_graph_nodes(nodes_df, name, value, size, category, symbol) %>%
+  e_graph_edges(edges_df, source, target) %>%
+  e_tooltip() %>%
+  e_title("Graphe de Connaissance des Scénarios Chatbot des Clients")
+
+
+
+
+
+
+
+
 ############## Scenario en francais
 path_data_fr_AFB23 <- file.path(path_data,"fr_info_data_AFB2023.json")
 # read data2
@@ -113,3 +157,7 @@ scenario_df <- scenario_df[order(scenario_df$Count, decreasing = TRUE), ]
 
 # Wordcloud sur les scenario
 wordcloud2(scenario_df,  size = 2)
+
+
+
+
