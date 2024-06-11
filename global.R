@@ -62,8 +62,8 @@ eval(parse('./modules/bs4_tooltip.R', encoding="UTF-8"))
 ################ Load loginc modules
 eval(parse('./modules/resquest_analysis.R', encoding="UTF-8"))
 eval(parse('./modules/call_sentiments.R', encoding="UTF-8"))
-eval(parse('./modules/resolution_metrics.R', encoding="UTF-8"))
 eval(parse('./modules/customer_interaction.R', encoding="UTF-8"))
+eval(parse('./modules/recommandation_system/app_recommandation.R', encoding="UTF-8"))
 
 # visualization modules ###
 eval(parse('./modules/mainContent.R', encoding="UTF-8"))

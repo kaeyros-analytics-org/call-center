@@ -48,8 +48,8 @@ $(document).ready(function(){
   
   $('li.nav-item').click(function(e) {
     let navItemText = $(this).children().html();
-    let possibilities = ["Home", "Customer Resquest Analysis", "Resolution Metrics", "Customer Service Experience"];
-    let nav_for_filter = ["customer Resquest Analysis", "Resolution Metrics", "Customer Service Experience"];
+    let possibilities = ["Home", "Customer Resquest Analysis", "Customer Service Experience", "Recommandation"];
+    let nav_for_filter = ["customer Resquest Analysis","Customer Service Experience", "Recommandation"];
     let iconChoices = ['class="bi bi-clipboard"', 'class="bi bi-chat-left-text"', 'class="bi bi-info-circle"', 'class="bi bi-file-earmark-text"', 'class="bi bi-question-circle"'];
     let iconTranslator = ["A propos de l'application", 'Feedback / Disclaimer', 'Methodische Hinweise', "Datenquellen", 'Virtueller Rundgang'];
 
