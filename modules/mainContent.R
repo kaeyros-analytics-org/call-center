@@ -65,10 +65,11 @@ mainContentRouter_server <- function(input, output, session, filterStates) {
     cat(" dans Service Experience Vous avez cliqué sur le tabPanel avec l'ID :", input$ressources_tabs, "\n")
   })
   
-  callModule(resquest_analysis_server, id = "resquest_analysis")
-  callModule(call_sentiments_server, id = "call_sentiments")
-  callModule(resolution_metrics_server, id = "resolution_metrics")
-  callModule(customer_interaction_server, id = "customer_interaction")
+  ####### Call server module for resquest analysis.
+  callModule(resquest_analysis_server, id = "resquest_analysis", filterStates = filterStates)
+  callModule(call_sentiments_server, id = "call_sentiments", filterStates = filterStates)
+  callModule(resolution_metrics_server, id = "resolution_metrics", filterStates = filterStates)
+  callModule(customer_interaction_server, id = "customer_interaction", filterStates = filterStates)
 }
 
 

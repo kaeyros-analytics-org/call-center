@@ -7,76 +7,90 @@ call_sentiments_ui <- function(id){
                "),
     div(class="container-fluid",
         div(class="row p-0 m-0", 
-            div(class="col-lg-6 pr-1 pl-0", br(), reactableOutput(ns("table")),
-                TextField.shinyInput(
-                  ns("textInput"),
-                  label = "Ecrivez votre remarque",
-                  style = "border: 1px solid blue; border-radius: 10px;"
-                )),
-            div(class="col-lg-6 pl-1 pr-0", plotlyOutput(ns("plot"), width = "100px", height = "500px"))))
+            div(class="col-lg-6 pr-1 pl-0", style = "text-align: center;", tags$h4("Most Occurring Scenario Chatbot"), plotlyOutput(ns("most_occurring_scenario"))
+            ),
+            div(class="col-lg-6 pl-1 pr-0", style = "text-align: center;", tags$h4("Call Sentiment"), id = "linechart",
+                echarts4rOutput(ns("call_sentiment"))
+            )
+        )
+    )
   )
   
 }
 
-fichier <- "./data/tab1.xlsx"
-table <- readxl::read_excel(fichier)
-table <- as.data.frame(table)
+
 
 ########### Server for ENTREE RELATION
-call_sentiments_server <- function(input, output, session){
+call_sentiments_server <- function(input, output, session, filterStates){
   
-  output$table <- renderReactable({
-    reactable(table, resizable = TRUE, selection = "single",
-              onClick = "select", pagination = TRUE, defaultPageSize = 11,
-              #searchable = TRUE,
-              wrap = FALSE,
-              striped = FALSE,
-              highlight = FALSE,
-              bordered = TRUE,
-              defaultColDef = colDef(
-                header = function(value) gsub(".", " ", value, fixed = TRUE),
-                align = "left",
-                headerStyle = list(background = "#f0f5f9")
-              ),
-              theme = reactableTheme(
-                stripedColor = "#f6f8fa",
-                highlightColor = "#5547AC",
-                cellPadding = "8px 12px",
-                style = list(fontFamily = "-apple-system, BlinkMacSystemFont, Segoe UI,
-          Helvetica, Arial, sans-serif"),
-                searchInputStyle = list(width = "100%"),
-                headerStyle = list(
-                  "&:hover[aria-sort]" = list(background = "hsl(0, 0%, 96%)"),
-                  "&[aria-sort='ascending'], &[aria-sort='descending']"
-                  = list(background = "hsl(0, 0%, 96%)"),
-                  borderColor = "grey"
-                ),
-                rowSelectedStyle = list(backgroundColor = "#0091E5",
-                                        boxShadow = "inset 2px 0 0 0 #ffa62d")
-                
-              )
-              
-    ) # End Reactable
+  data_en_filter <- reactive({ sentiment_data %>%
+      filter(Start_time_discusion >= ymd(filterStates$date_start) &
+               Start_time_discusion <= ymd(filterStates$date_end)) 
   })
   
   
-  output$plot <- renderPlotly({
-    stock <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/finance-charts-apple.csv')
+  output$most_occurring_scenario <- renderPlotly({ 
     
-    fig <- plot_ly(stock, type = 'scatter', mode = 'lines', line = list(color = "#05529B"))%>%
-      add_trace(x = ~Date, y = ~AAPL.High, marker = list(color = "#0077B6"))%>%
-      layout(showlegend = F)
-    fig <- fig %>%
+    # Créer le graphique
+    # top_30_sorted %>%
+    #   e_charts(Scenario) %>%
+    #   e_bar(Count) %>%
+    #   e_flip_coords() %>% 
+    #   e_tooltip(trigger = "axis", axisPointer = list(type = "shadow")) %>%
+    #   e_x_axis(name = "Occurrences") %>%
+    #   e_y_axis(name = "Scénario") %>% 
+    #   e_toolbox_feature() %>% 
+    #   e_toolbox_feature(
+    #     feature = "magicType",
+    #     type = list("line", "bar") 
+    #   ) %>% 
+    #   e_legend(type = "scroll", orient = "vertical", right = "0%", top = "10%")
+
+    plot_ly(top_30, x = ~Count, y = ~Scenario, type = 'bar', orientation = 'h') %>%
       layout(
-        xaxis = list(zerolinecolor = '#ffff',
-                     zerolinewidth = 2,
-                     gridcolor = 'ffff'),
-        yaxis = list(zerolinecolor = '#ffff',
-                     zerolinewidth = 2,
-                     gridcolor = 'ffff'),
-        plot_bgcolor='#e5ecf6', width = 650)
+             xaxis = list(title = "Occurrences"),
+             yaxis = list(title = "Scénario"))
+    }) 
+  
+  output$call_sentiment <- renderEcharts4r({
+    
+    #client_values <- data_en_filter()$value
+    # data_en_filter()[1:5,3:10]
+    emotions <- colSums(prop.table(data_en_filter()[,3:10]))
+    pourcentage_positive  <- colSums(prop.table(data_en_filter()[,11:12]))
     
     
-    fig
-  })
+    df_emotions <- as.data.frame(emotions)
+    df_emotions$label <- rownames(df_emotions)
+    
+    pie_chart <- df_emotions |> 
+      e_charts(label) |> 
+      e_pie(
+        emotions,
+        radius = c("40%", "70%"),
+        itemStyle = list(
+          borderRadius = 20,
+          borderColor = '#fff',
+          borderWidth = 2
+        )
+      ) %>%  # Centrer le graphique
+      e_tooltip(formatter = htmlwidgets::JS("function(params) { return params.name + ': ' + (params.percent + '%'); }")) %>%
+      e_labels(show = TRUE,
+               formatter = "{d}%",
+               position = "inside") %>%
+      e_legend(right = 0, 
+               orient = "vertical")
+    
+    # Affichage du graphique
+    pie_chart
+    
+    # plot_ly(labels = names(emotions), values = emotions, type = "pie", hole = 0.5) %>%
+    #   add_annotations(
+    #     text = paste0(round(pourcentage_positive[2]*100, 2),  "% positive"),
+    #     x = 0.5, y = 0.5, showarrow = FALSE, font = list(size = 20, color = "gray")) %>%
+    #   add_trace(
+    #     textinfo = "percent",
+    #     hoverinfo = "text+percent",
+    #     text = ~paste(names(emotions)))
+  }) 
 }

@@ -1,0 +1,13 @@
+name: Call_center_news
+title: Call_center_news
+username: mih0ux-ruddy0luther-nana
+account: mih0ux-ruddy0luther-nana
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 12021852
+bundleId: 8628262
+url: https://mih0ux-ruddy0luther-nana.shinyapps.io/Call_center_news/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: customer_agent_en.R|customer_agent_fr.R|fr_info_data_AFB2023.json|scenario_analyst.R

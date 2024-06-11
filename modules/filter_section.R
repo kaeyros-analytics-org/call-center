@@ -5,13 +5,13 @@ filterStatesRouter_ui <- function(id) {
     shinyjs::useShinyjs(),
     div(id = "filterBox",
         uiOutput(ns("dateRange")),
-        uiOutput(ns("country")),
-        uiOutput(ns("city")),
+        #uiOutput(ns("country")),
+        #uiOutput(ns("city")),
         ################### This button apply a filter
         uiOutput(ns("filter_button")),
         ############ This button is for generate and Download report in .docx format
         tags$br(),
-        uiOutput(ns("countryselect"))
+        #uiOutput(ns("countryselect"))
     )
   )
   
@@ -41,7 +41,7 @@ filterStatesRouter_server <- function(input, output, session, filterStates) {
       ################## Date filter
       output$dateRange <- renderUI({
         tagList(
-          div(class="sidebar-header", tags$a("Choisir l'écart de date: ")),
+          div(class="sidebar-header", tags$a("Select Date Range: ")),
           backendTooltip(span(`data-toggle`="tooltip",
                               `data-placement`="right",
                               `data-html` = "true",
@@ -50,9 +50,25 @@ filterStatesRouter_server <- function(input, output, session, filterStates) {
                            Crée une paire d'entrées de texte qui, lorsqu'elles sont cliquées,
                           font apparaître des calendriers sur lesquels l'utilisateur peut cliquer pour sélectionner des dates.", 
                               HTML('<i class="bi bi-question-circle"></i>'))),
-          dateRangeInput("dateRangeInput", label = NULL,
-                         start = as.Date(filterStates$date_start), end = as.Date(filterStates$date_end),
-                         min = "2021-10-20", max = "2024-3-31"),
+          # dateRangeInput("dateRangeInput", label = NULL,
+          #                start = as.Date(filterStates$date_start), end = as.Date(filterStates$date_end),
+          #                min = "2021-10-20", max = "2023-5-31")
+          daterangepicker(
+            inputId = "date_range",
+            label = NULL,
+            start = as.Date(min(data$Start_time_discusion)), end = as.Date(max(data$Start_time_discusion)),
+            max = as.Date(max(data$Start_time_discusion)),
+            language = "en",
+            # ranges = list(
+            #   "Today" = Sys.Date(),
+            #   "Yesterday" = Sys.Date() - 1,
+            #   "Last 3 days" = c(Sys.Date() - 2, Sys.Date()),
+            #   "Last 7 days" = c(Sys.Date() - 6, Sys.Date())
+            # ),
+            style = "width:100%; border-radius:4px",
+            class = "myclass",
+            icon = icon("calendar")
+          ),
           tags$script(src = "./js/tooltip.js")
         )
       })
