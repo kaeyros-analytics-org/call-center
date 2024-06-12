@@ -2,4 +2,8 @@
 .Rhistory
 .RData
 .Ruserdata
+<<<<<<< HEAD
 data
+=======
+.data/
+>>>>>>> 89b1584fa288735c67d28f3757c71864c93a8a6e

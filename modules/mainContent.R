@@ -20,7 +20,7 @@ mainContentRouter_server <- function(input, output, session, filterStates) {
   ui_resquest_analysis = resquest_analysis_ui(session$ns("resquest_analysis"))
 
   ############# This UI is for Réemploies Layout Page
-  ui_resolution_metrics = resolution_metrics_ui(session$ns("resolution_metrics"))
+  ui_recommandation = recommandation_ui(session$ns("recommandation"))
   
   
   ############# This UI is for recouvrement Layout Page
@@ -40,9 +40,9 @@ mainContentRouter_server <- function(input, output, session, filterStates) {
           )
         })
       # generate Réemploies content ####
-      } else if(filterStates$dataNavi$dataset == "Resolution Metrics") {
+      } else if(filterStates$dataNavi$dataset == "Recommandation") {
         output$mainContent <- renderUI({
-          ui_resolution_metrics
+          ui_recommandation
         })
         # generate Recouvrement content ####
       } else if(filterStates$dataNavi$dataset == "Customer Service Experience") {
@@ -68,7 +68,7 @@ mainContentRouter_server <- function(input, output, session, filterStates) {
   ####### Call server module for resquest analysis.
   callModule(resquest_analysis_server, id = "resquest_analysis", filterStates = filterStates)
   callModule(call_sentiments_server, id = "call_sentiments", filterStates = filterStates)
-  callModule(resolution_metrics_server, id = "resolution_metrics", filterStates = filterStates)
+  callModule(recommandation_server, id = "recommandation")
   callModule(customer_interaction_server, id = "customer_interaction", filterStates = filterStates)
 }
 
