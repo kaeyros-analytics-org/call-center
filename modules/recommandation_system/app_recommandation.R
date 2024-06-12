@@ -65,7 +65,7 @@ cosine_similarity <- function(A, B) {
 }
 
 # Fonction de recommandation des produits
-recommender_system <- function(discussion, topic_model, grouped_train_data, k = 5) {
+recommender_system <- function(discussion, topic_model, grouped_train_data) {
   # Prétraiter le texte de la discussion
   discussion <- sapply(discussion , preprocess_text)
 
@@ -116,6 +116,15 @@ recommender_system <- function(discussion, topic_model, grouped_train_data, k = 
     stop("Aucune similarité n'a été calculée.")
   }
 
+  # Identifier les outliers supérieurs au troisième quartile
+  Q3_outliers <- similarities > quantile(similarities, probs = 0.75, na.rm = TRUE)
+  
+  # Compter le nombre d'outliers supérieurs au troisième quartile
+  num_outliers <- sum(Q3_outliers, na.rm = TRUE)
+  
+  # Sélectionner les indices des documents les plus similaires
+  k <- num_outliers
+  
   # Trouver les k documents les plus similaires
   knn_indices <- order(similarities, decreasing = TRUE)[1:k]
   closest_docs <- colnames(similarities)[knn_indices]
