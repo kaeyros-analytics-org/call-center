@@ -126,13 +126,13 @@ info_data_AFB2023$Start_time_agent <- ymd_hms(info_data_AFB2023$Start_time_agent
 info_data_AFB2023$End_time_agent <- ymd_hms(info_data_AFB2023$End_time_agent)
 
 
-data <- info_data_AFB2023[sample(nrow(info_data_AFB2023), 500), ]
+data <- info_data_AFB2023#[sample(nrow(info_data_AFB2023), 500), ]
 
 # ##### Data to display resquest_analysis page ######
 resquest_analysis_file <- file.path(path_data,"resquest_analysis_data","resquest_analysis_data.json")
 resquest_analysis_data <- fromJSON(resquest_analysis_file)
 resquest_analysis_data$Start_time_discusion <- ymd_hms(resquest_analysis_data$Start_time_discusion)
-resquest_analysis_data <- resquest_analysis_data[sample(nrow(resquest_analysis_data), 500), ]
+resquest_analysis_data <- resquest_analysis_data#[sample(nrow(resquest_analysis_data), 500), ]
 
 
 ######## Data to display resolution_metrics page #############
@@ -140,7 +140,7 @@ resquest_analysis_data <- resquest_analysis_data[sample(nrow(resquest_analysis_d
 resolution_metrics_file <- file.path(path_data,"resolution_metrics_data","resolution_metrics_data.json")
 resolution_metrics_data <- fromJSON(resolution_metrics_file)
 resolution_metrics_data$Start_time_discusion <- as.Date(resolution_metrics_data$Start_time_discusion)
-resolution_metrics_data <- resolution_metrics_data[sample(nrow(resolution_metrics_data), 500), ]
+resolution_metrics_data <- resolution_metrics_data#[sample(nrow(resolution_metrics_data), 500), ]
 
 
 
@@ -148,12 +148,12 @@ resolution_metrics_data <- resolution_metrics_data[sample(nrow(resolution_metric
 data_average_call_agent_file <- file.path(path_data,"customer_interaction_data","data_average_call_agent.json")
 data_average_call_agent <- fromJSON(data_average_call_agent_file)
 data_average_call_agent$Start_time_discusion <- as.Date(data_average_call_agent$Start_time_discusion)
-data_average_call_agent <- data_average_call_agent[sample(nrow(data_average_call_agent), 500), ]
+data_average_call_agent <- data_average_call_agent#[sample(nrow(data_average_call_agent), 500), ]
 
 wordcloud_data_file <- file.path(path_data,"customer_interaction_data","wordcloud_data.json")
 wordcloud_data <- fromJSON(wordcloud_data_file)
 wordcloud_data$Start_time_discusion <- as.Date(wordcloud_data$Start_time_discusion)
-wordcloud_data <- wordcloud_data[sample(nrow(wordcloud_data), 500), ]
+wordcloud_data <- wordcloud_data#[sample(nrow(wordcloud_data), 500), ]
 
 
 # ####################### Data to display scenarios ############################

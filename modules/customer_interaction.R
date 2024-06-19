@@ -5,19 +5,15 @@ customer_interaction_ui <- function(id){
     tags$style("
                .fieldGroup-82{border: none;}
                "),
-    div(class="container-fluid",
-        div(class="row p-0 m-0", 
-            div(class="col-lg-6 pr-1 pl-0", style = "text-align: center;", tags$h4("Average Call Duration by Agent"), 
-                plotlyOutput(ns("requests_by_agent"), width = 1200)
-            )
+    div(class="container-fluid", style = "text-align: center;", tags$h4("Average Call Duration by Agent"), 
+                plotlyOutput(ns("requests_by_agent"))
+            ),
+    div(class="container-fluid", style = "text-align: center;", tags$h4("Wordcloud"),
+            uiOutput(ns("Wordcloud"), style="display: inline-block;")
         ),
-        div(style = "text-align: center;", tags$h4("Wordcloud"),
-            uiOutput(ns("Wordcloud"), width = 1600)
-        ),
-        div(class="col-lg-6 pl-1 pr-0", style = "text-align: center;", tags$h4("Average Time of Resolution by Topic"),
+    div(class="container-fluid", style = "text-align: center;", tags$h4("Average Time of Resolution by Topic"),
             htmlOutput(ns('topicChart'))
         )
-    )
   )
   
   
@@ -58,7 +54,7 @@ customer_interaction_server <- function(input, output, session, filterStates){
     route <- paste(file.path(path_data,"customer_interaction_data"),"/Topic_modelling", sep="")
     addResourcePath("lda", route)
     url = "lda/index.html"
-    lda <- tags$iframe(src=url, height=700, width=1200)
+    lda <- tags$iframe(src=url, height=700, width=1400)
     lda
     })
   

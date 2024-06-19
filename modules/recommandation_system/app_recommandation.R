@@ -19,6 +19,8 @@ library(SnowballC)
 library(textstem)
 library(proxy)
 library(tidytext)
+library(shinyjs)
+
 # Définir la liste des stopwords et mots à ajouter
 stopwords_list <- stopwords::stopwords('fr', source='stopwords-iso')
 mots_a_ajouter <- c("fichier", "jpg","hello", "ok", "okay", "pdf", "bonjour", "bsr","bjr", "banque", "bonsoir",
@@ -75,7 +77,7 @@ recommender_system <- function(discussion, topic_model, grouped_train_data) {
 
   # Vérifiez si dfm_new contient des termes
   if (nfeat(dfm_new) == 0) {
-    stop("La matrice document-fréquence (dfm) est vide après prétraitement.")
+    stop("No Products for this discussion")
   }
 
   # Obtenir le sujet dominant de la nouvelle discussion
@@ -88,7 +90,7 @@ recommender_system <- function(discussion, topic_model, grouped_train_data) {
 
   # Vérifiez si des documents correspondent au sujet dominant
   if (!any(topic_docs)) {
-    stop("Aucun document ne correspond au sujet dominant.")
+    stop("No Products for this discussion")
   }
 
   dfm_topic <- dfm(grouped_train_data$discussion_text_client[topic_docs], docnames = paste0("doc_", seq_along(topic_docs)))
@@ -98,10 +100,10 @@ recommender_system <- function(discussion, topic_model, grouped_train_data) {
 
   # Vérifiez si dfm_new et dfm_topic contiennent des termes après harmonisation
   if (nfeat(dfm_new) == 0) {
-    stop("La matrice document-fréquence (dfm) harmonisée est vide.")
+    stop("No Products for this discussion")
   }
   if (nfeat(dfm_topic) == 0) {
-    stop("La matrice document-fréquence (dfm) du topic est vide.")
+    stop("No Products for this discussion")
   }
 
   # Convertir les DFMs en matrices denses
@@ -113,7 +115,7 @@ recommender_system <- function(discussion, topic_model, grouped_train_data) {
 
   # Vérifiez si des similarités sont calculées
   if (length(similarities) == 0) {
-    stop("Aucune similarité n'a été calculée.")
+    stop("No Products for this discussion")
   }
 
   # Identifier les outliers supérieurs au troisième quartile
@@ -137,7 +139,7 @@ recommender_system <- function(discussion, topic_model, grouped_train_data) {
 
   # Vérifiez si des produits ont été sélectionnés
   if (nrow(selected_products) == 0) {
-    stop("Aucun produit sélectionné.")
+    stop("No Products for this discussion")
   }
 
   # Extraire les valeurs de similarité correspondantes
@@ -151,9 +153,14 @@ recommender_system <- function(discussion, topic_model, grouped_train_data) {
     weighted_products <- rbind(weighted_products, data.frame(products = products, similarity = similarity))
   }
 
+  # Vérifiez si il y'a des lignes à aggreger
+  if (nrow(weighted_products) == 0) {
+    stop("No Products for this discussion")
+  }
   # Compter les occurrences pondérées de chaque produit
   product_counts <- aggregate(similarity ~ products, data = weighted_products, sum)
-
+  
+  
   # Calculer les scores de recommandation pour chaque produit
   product_counts$score <- round(product_counts$similarity / sum(product_counts$similarity) * 100, 2)
 
@@ -166,24 +173,40 @@ recommender_system <- function(discussion, topic_model, grouped_train_data) {
 }
 
 # Interface utilisateur
-recommandation_ui <- function(id){
+recommandation_ui <- function(id) {
   ns <- NS(id)
+  
   fluentPage(
+    useShinyjs(),  # Activer shinyjs
+    tags$style("
+      #error-message {
+        display: none;
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        border-radius: 4px;
+        padding: 10px;
+        margin-bottom: 15px;
+      }
+    "),
     div(class="container-fluid",
         div(class="row p-0 m-0",
             div(class="col-lg-6 pr-1 pl-0", style = "text-align: center;",
-                textAreaInput(ns("discussion"), "Entrez la discussion du client :", "", width = "1000px", rows = 5),
-                DefaultButton.shinyInput(ns("recommender"), "Recommender des produits",
-                                         style = "color: #fff; background-color: #001C97; float: left;")
+                textAreaInput(ns("discussion"), tags$h4("Entrez la discussion du client :"), "", width = "1000px", rows = 5),
+                DefaultButton.shinyInput(ns("recommender"), "Recommander des produits",
+                                         style = "color: #fff; background-color: #007BFF; float: left; border-radius: 5px;")
             ),
-            div(class="col-lg-6 pr-1 pl-0", style = "text-align: center;",
-                reactableOutput(ns("recommendations"))
+            div(class="row p-0 m-0",
+                div(class="col-lg-6 pr-1 pl-0", style = "text-align: center;",
+                    reactableOutput(ns("recommendations"), width = "800")
+                )
             )
-        )
+        ),
+        div(id = ns("error-message"), style = "color: gray; font-weight: bold; padding: 10px; font-size: 60px;")
     )
-
   )
 }
+
 
 # Serveur
 recommandation_server <- function(input, output, session) {
@@ -192,30 +215,35 @@ recommandation_server <- function(input, output, session) {
   load("./modules/recommandation_system/topic_model.RData")
   
   observeEvent(input$recommender, {
-    print("recommander!")
-  })
-
-  recommendations <- eventReactive(input$recommender, {
-    #req(input$discussion)
-    discussion <- as.character(input$discussion)
-    recommender_system(discussion, topic_model, grouped_train_data)
-  })
-
-  output$recommendations <- renderReactable({
-    reactable(recommendations(),
-              striped = TRUE,
-              highlight = TRUE,
-              bordered = TRUE,
-              theme = reactableTheme(
-                borderColor = "#B5E4FB",
-                stripedColor = "#f6f8fa",
-                highlightColor = "#91A5FE",
-                cellPadding = "8px 12px",
-                style = list(fontFamily = "-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif",
-                             fontSize = "1.10rem"),
-                searchInputStyle = list(width = "100%")
-              )
-    )
+    req(input$discussion)
+    discussion <- input$discussion
+    
+    tryCatch({
+      recommendations <- recommender_system(discussion, topic_model, grouped_train_data)
+      output$recommendations <- renderReactable({
+        reactable(recommendations,
+                  striped = TRUE,
+                  highlight = TRUE,
+                  bordered = TRUE,
+                  theme = reactableTheme(
+                    borderColor = "#B5E4FB",
+                    stripedColor = "#f6f8fa",
+                    highlightColor = "#91A5FE",
+                    cellPadding = "8px 12px",
+                    style = list(fontFamily = "-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif",
+                                 fontSize = "1.10rem"),
+                    searchInputStyle = list(width = "100%")
+                  )
+        )
+      })
+      shinyjs::hide("error-message")
+    }, error = function(e) {
+      error_message <- e$message
+      shinyjs::html("error-message", error_message)
+      shinyjs::show("error-message")
+      output$recommendations <- renderReactable({ })
+    })
   })
 }
+
 
